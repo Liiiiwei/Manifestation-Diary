@@ -48,12 +48,12 @@ export const createNightlyWriter = () => {
       input.disabled = true;
 
       // 同步至 Notion
-      const success = await syncToNotion({
+      const res = await syncToNotion({
         category: '夜間寫作',
         affirmation: value
       });
 
-      if (success) {
+      if (res.success) {
         btn.innerText = '顯化能量已注入';
 
         // --- 強化回饋動畫 ---
@@ -91,9 +91,10 @@ export const createNightlyWriter = () => {
           });
         }
       } else {
-        btn.innerText = '同步失敗，請檢查網路或設定';
+        btn.innerText = '同步失敗 (點擊重試)';
         btn.disabled = false;
         btn.style.background = 'rgba(255, 0, 0, 0.05)';
+        alert(`同步失敗：${res.error}`);
       }
     } else {
       input.value = "";
@@ -127,10 +128,16 @@ export const createHappyThings = () => {
     btn.innerText = '已記錄美好時刻';
     btn.disabled = true;
 
-    await syncToNotion({
+    const res = await syncToNotion({
       category: '快樂小事',
       happyThings: [h1, h2, h3]
     });
+
+    if (!res.success) {
+      btn.innerText = '同步失敗';
+      btn.disabled = false;
+      alert(`同步失敗：${res.error}`);
+    }
   };
 
   return container;
@@ -152,10 +159,18 @@ export const createEnvelope = () => {
     envIcon.style.transform = 'scale(1.05)';
     envIcon.style.borderColor = 'var(--accent-gold)';
 
-    await syncToNotion({
+    const res = await syncToNotion({
       category: '已接收感謝',
       reflections: '今日收悉一份感謝能量'
     });
+
+    if (!res.success) {
+      alert(`同步失敗：${res.error}`);
+      // Reset style
+      envIcon.style.transform = 'scale(1)';
+      envIcon.style.borderColor = 'var(--accent-border)';
+      return;
+    }
 
     setTimeout(() => {
       envIcon.textContent = '感謝已密封';
@@ -300,10 +315,19 @@ export const createSpaceClearing = () => {
         label.style.opacity = '0.5';
         checkbox.disabled = true;
 
-        await syncToNotion({
+        const res = await syncToNotion({
           category: '空間清理',
           affirmation: `已完成：${task}`
         });
+
+        if (!res.success) {
+          alert(`同步失敗：${res.error}`);
+          // Revert UI
+          label.style.textDecoration = 'none';
+          label.style.opacity = '1';
+          checkbox.disabled = false;
+          checkbox.checked = false;
+        }
       }
     };
     container.appendChild(item);
@@ -358,10 +382,20 @@ export const createDopamineDetox = () => {
           easing: 'easeOutQuad'
         });
 
-        await syncToNotion({
+        const res = await syncToNotion({
           category: '多巴安戒斷',
           affirmation: `已完成：${task}`
         });
+
+        if (!res.success) {
+          alert(`同步失敗：${res.error}`);
+          // Revert UI
+          label.style.textDecoration = 'none';
+          label.style.opacity = '1';
+          checkbox.disabled = false;
+          checkbox.checked = false;
+          item.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+        }
       }
     };
     container.appendChild(item);

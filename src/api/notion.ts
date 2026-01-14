@@ -17,7 +17,7 @@ export interface DiaryEntry {
 
 const NOTION_PROXY_URL = '/api/notion/pages';
 
-export const syncToNotion = async (entry: DiaryEntry) => {
+export const syncToNotion = async (entry: DiaryEntry): Promise<{ success: boolean; error?: string }> => {
     console.log('正在同步至 Notion...', entry);
 
     try {
@@ -64,15 +64,25 @@ export const syncToNotion = async (entry: DiaryEntry) => {
         });
 
         if (!response.ok) {
-            const errorData = await response.text();
-            console.error('Notion 同步失敗:', errorData);
-            return false;
+            let errorMsg = `HTTP ${response.status}`;
+            try {
+                const errorData = await response.json();
+                errorMsg = errorData.error || errorData.message || JSON.stringify(errorData);
+                // Check specifically for the integration permission error
+                if (response.status === 404) {
+                    errorMsg = "找不到資料庫。請確認：1. Database ID 正確 2. 已在 Notion 頁面右上角 '...' > 'Connections' 加入您的機器人 integration。";
+                }
+            } catch (e) {
+                errorMsg = await response.text();
+            }
+            console.error('Notion 同步失敗:', errorMsg);
+            return { success: false, error: errorMsg };
         }
 
-        return true;
-    } catch (error) {
+        return { success: true };
+    } catch (error: any) {
         console.error('Notion 同步出錯:', error);
-        return false;
+        return { success: false, error: error.message || '網路錯誤' };
     }
 };
 export const fetchRecordedDates = async (): Promise<string[]> => {
