@@ -28,8 +28,14 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Notion Proxy - handle all /api/notion/* paths
-app.use('/api/notion', async (req, res) => {
+// Request Logger
+app.use((req, res, next) => {
+    console.log(`[Request] ${new Date().toISOString()} ${req.method} ${req.url}`);
+    next();
+});
+
+// Notion Proxy - handle all /notion/api/* paths
+app.use('/notion/api', async (req, res) => {
     // Remove /api/notion prefix to get the actual Notion API path
     let notionPath = req.path.substring(1); // Remove leading /
     const apiKey = process.env.VITE_NOTION_API_KEY || process.env.NOTION_API_KEY;

@@ -15,7 +15,7 @@ export interface DiaryEntry {
     clearingTask?: string;
 }
 
-const NOTION_PROXY_URL = '/api/notion/pages';
+const NOTION_PROXY_URL = '/notion/api/pages';
 
 export const syncToNotion = async (entry: DiaryEntry): Promise<{ success: boolean; error?: string }> => {
     console.log('正在同步至 Notion...', entry);
@@ -91,7 +91,7 @@ export const syncToNotion = async (entry: DiaryEntry): Promise<{ success: boolea
 };
 export const fetchRecordedDates = async (): Promise<string[]> => {
     const databaseId = import.meta.env.VITE_NOTION_DATABASE_ID;
-    const url = `/api/notion/databases/${databaseId}/query`;
+    const url = `/notion/api/databases/${databaseId}/query`;
 
     try {
         const response = await fetch(url, {
