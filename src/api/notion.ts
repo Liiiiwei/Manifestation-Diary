@@ -65,15 +65,19 @@ export const syncToNotion = async (entry: DiaryEntry): Promise<{ success: boolea
 
         if (!response.ok) {
             let errorMsg = `HTTP ${response.status}`;
+            const errorText = await response.text();
+
             try {
-                const errorData = await response.json();
+                const errorData = JSON.parse(errorText);
                 errorMsg = errorData.error || errorData.message || JSON.stringify(errorData);
-                // Check specifically for the integration permission error
-                if (response.status === 404) {
-                    errorMsg = "找不到資料庫。請確認：1. Database ID 正確 2. 已在 Notion 頁面右上角 '...' > 'Connections' 加入您的機器人 integration。";
-                }
             } catch (e) {
-                errorMsg = await response.text();
+                // Not JSON, use the raw text if available
+                if (errorText) errorMsg = errorText;
+            }
+
+            // Check specifically for the integration permission error
+            if (response.status === 404) {
+                errorMsg = "找不到資料庫。請確認：1. Database ID 正確 2. 已在 Notion 頁面右上角 '...' > 'Connections' 加入您的機器人 integration。";
             }
             console.error('Notion 同步失敗:', errorMsg);
             return { success: false, error: errorMsg };
