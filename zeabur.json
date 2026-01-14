@@ -1,0 +1,12 @@
+{
+    "$schema": "https://zeabur.com/schema.json",
+    "build": {
+        "buildCommand": "npm install && npm run build"
+    },
+    "deploy": {
+        "startCommand": "node server.js"
+    },
+    "env": {
+        "NODE_ENV": "production"
+    }
+}
