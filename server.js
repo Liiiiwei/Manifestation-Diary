@@ -11,7 +11,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 8080;
+
 
 console.log('--- BACKEND_START_SEQUENCE ---');
 console.log('Node Version:', process.version);
@@ -114,8 +115,8 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-app.listen(3000, '127.0.0.1', () => {
-    console.log(`✨ Manifestation Diary Server running on port 3000`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✨ Manifestation Diary Server running on port ${PORT}`);
     console.log(`📝 Notion API Key: ${process.env.VITE_NOTION_API_KEY ? 'Configured' : 'MISSING'}`);
     console.log(`🗄️  Database ID: ${process.env.VITE_NOTION_DATABASE_ID ? 'Configured' : 'MISSING'}`);
-});  
+});
