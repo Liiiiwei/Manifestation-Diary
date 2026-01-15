@@ -445,23 +445,33 @@ export const createMomentUploader = () => {
     const file = fileInput.files?.[0];
     if (!file) return;
 
-    btn.innerText = '正在傳送至宇宙伺服器...';
+    // 取得環境變數
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      alert('請先在環境變數中設定 Cloudinary 的 Cloud Name 與 Upload Preset');
+      return;
+    }
+
+    btn.innerText = '正在上傳至雲端中...';
     btn.disabled = true;
 
     try {
-      // 1. Upload to ImgBB (using a free public key)
+      // 1. Upload to Cloudinary
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('file', file);
+      formData.append('upload_preset', uploadPreset);
 
-      const uploadRes = await fetch('https://api.imgbb.com/1/upload?key=6df215d5e5b38ed6147614d18fac56f3', {
+      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
         method: 'POST',
         body: formData
       });
 
-      const uploadData = await uploadRes.json();
-      if (!uploadData.success) throw new Error('圖片上傳失敗');
+      const uploadResult = await uploadRes.json();
+      if (uploadResult.error) throw new Error(uploadResult.error.message);
 
-      const imageUrl = uploadData.data.url;
+      const imageUrl = uploadResult.secure_url;
 
       // 2. Sync to Notion
       const res = await syncToNotion({
@@ -481,6 +491,7 @@ export const createMomentUploader = () => {
         throw new Error(res.error || 'Notion 同步失敗');
       }
     } catch (err: any) {
+      console.error('上傳出錯:', err);
       alert(`失敗：${err.message}`);
       btn.innerText = '重試發送';
       btn.disabled = false;
