@@ -1,5 +1,5 @@
 import './style.css'
-import { createSection, createNightlyWriter, createHappyThings, createEnvelope, createSpaceClearing, createStreakTracker, createCalendarView, createDopamineDetox } from './components/diary'
+import { createSection, createNightlyWriter, createHappyThings, createEnvelope, createSpaceClearing, createStreakTracker, createCalendarView, createDopamineDetox, createMomentUploader } from './components/diary'
 import { animate } from 'animejs'
 
 const app = document.querySelector<HTMLDivElement>('#app')!
@@ -20,6 +20,7 @@ app.innerHTML = `
     <div id="section-happy"></div>
     <div id="section-clearing"></div>
     <div id="section-detox"></div>
+    <div id="section-moment"></div>
   </div>
   
   <footer style="text-align: center; margin-top: var(--space-xl); color: var(--sumi-muted); font-size: 0.75rem; padding-bottom: var(--space-lg); letter-spacing: 0.1em;">
@@ -61,7 +62,8 @@ const sections = [
   { id: 'section-writing', title: '夜間顯化書寫', component: createNightlyWriter() },
   { id: 'section-happy', title: '活在當下', component: createHappyThings() },
   { id: 'section-clearing', title: '能量空間清理', component: createSpaceClearing() },
-  { id: 'section-detox', title: '多巴安戒斷', component: createDopamineDetox() }
+  { id: 'section-detox', title: '多巴安戒斷', component: createDopamineDetox() },
+  { id: 'section-moment', title: '生活瞬間', component: createMomentUploader() }
 ];
 
 sections.forEach((section, index) => {

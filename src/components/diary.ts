@@ -403,3 +403,89 @@ export const createDopamineDetox = () => {
 
   return container;
 };
+
+export const createMomentUploader = () => {
+  const container = document.createElement('div');
+  container.className = 'moment-uploader-container';
+  container.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+      <p style="font-size: 0.8125rem; color: var(--sumi-muted);">記錄今天最有能量的一個瞬間</p>
+      <div id="image-preview-container" style="width: 100%; aspect-ratio: 16/9; background: rgba(0,0,0,0.02); border: 1px dashed var(--accent-border); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: pointer;">
+        <span id="preview-placeholder" style="color: var(--sumi-muted); font-size: 0.75rem;">點擊上傳圖片</span>
+        <img id="image-preview" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+      </div>
+      <input type="file" id="moment-file-input" accept="image/*" style="display: none;">
+      <button id="btn-submit-moment" class="btn-primary" disabled>封存這個瞬間</button>
+    </div>
+  `;
+
+  const fileInput = container.querySelector('#moment-file-input') as HTMLInputElement;
+  const previewContainer = container.querySelector('#image-preview-container') as HTMLDivElement;
+  const previewImg = container.querySelector('#image-preview') as HTMLImageElement;
+  const placeholder = container.querySelector('#preview-placeholder') as HTMLSpanElement;
+  const btn = container.querySelector('#btn-submit-moment') as HTMLButtonElement;
+
+  previewContainer.onclick = () => fileInput.click();
+
+  fileInput.onchange = () => {
+    const file = fileInput.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImg.src = e.target?.result as string;
+        previewImg.style.display = 'block';
+        placeholder.style.display = 'none';
+        btn.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  btn.onclick = async () => {
+    const file = fileInput.files?.[0];
+    if (!file) return;
+
+    btn.innerText = '正在傳送至宇宙伺服器...';
+    btn.disabled = true;
+
+    try {
+      // 1. Upload to ImgBB (using a free public key)
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const uploadRes = await fetch('https://api.imgbb.com/1/upload?key=6df215d5e5b38ed6147614d18fac56f3', {
+        method: 'POST',
+        body: formData
+      });
+
+      const uploadData = await uploadRes.json();
+      if (!uploadData.success) throw new Error('圖片上傳失敗');
+
+      const imageUrl = uploadData.data.url;
+
+      // 2. Sync to Notion
+      const res = await syncToNotion({
+        category: '生活瞬間',
+        affirmation: '今日美好瞬間',
+        imageUrl: imageUrl
+      });
+
+      if (res.success) {
+        btn.innerText = '已留存永恆能量';
+        animate(previewContainer, {
+          boxShadow: ['0 0 0 rgba(201,169,97,0)', '0 0 20px rgba(201,169,97,0.5)', '0 0 0 rgba(201,169,97,0)'],
+          duration: 1500,
+          easing: 'easeInOutQuad'
+        });
+      } else {
+        throw new Error(res.error || 'Notion 同步失敗');
+      }
+    } catch (err: any) {
+      alert(`失敗：${err.message}`);
+      btn.innerText = '重試發送';
+      btn.disabled = false;
+    }
+  };
+
+  return container;
+};

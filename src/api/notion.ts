@@ -8,11 +8,12 @@
  */
 
 export interface DiaryEntry {
-    category: '夜間寫作' | '快樂小事' | '空間清理' | '已接收感謝' | '多巴安戒斷';
+    category: '夜間寫作' | '快樂小事' | '空間清理' | '已接收感謝' | '多巴安戒斷' | '生活瞬間';
     affirmation?: string;
     happyThings?: string[];
     reflections?: string;
     clearingTask?: string;
+    imageUrl?: string;
 }
 
 const NOTION_PROXY_URL = '/notion/api/pages';
@@ -58,7 +59,18 @@ export const syncToNotion = async (entry: DiaryEntry): Promise<{ success: boolea
                         date: {
                             start: new Date().toISOString().split('T')[0]
                         }
-                    }
+                    },
+                    'Image': entry.imageUrl ? {
+                        files: [
+                            {
+                                name: 'Uploaded Image',
+                                type: 'external',
+                                external: {
+                                    url: entry.imageUrl
+                                }
+                            }
+                        ]
+                    } : undefined
                 }
             })
         });
