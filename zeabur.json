@@ -4,7 +4,7 @@
         "buildCommand": "npm install && npm run build"
     },
     "deploy": {
-        "startCommand": "node server.js"
+        "startCommand": "caddy run --config Caddyfile & node server.js"
     },
     "env": {
         "NODE_ENV": "production"
