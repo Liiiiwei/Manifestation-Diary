@@ -114,8 +114,8 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-app.listen(PORT, 'localhost', () => {
-    console.log(`✨ Manifestation Diary Server running on port ${PORT}`);
+app.listen(3000, '127.0.0.1', () => {
+    console.log(`✨ Manifestation Diary Server running on port 3000`);
     console.log(`📝 Notion API Key: ${process.env.VITE_NOTION_API_KEY ? 'Configured' : 'MISSING'}`);
     console.log(`🗄️  Database ID: ${process.env.VITE_NOTION_DATABASE_ID ? 'Configured' : 'MISSING'}`);
-});
+});  
